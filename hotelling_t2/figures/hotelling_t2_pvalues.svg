@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620">
+<rect width="100%" height="100%" fill="white"/>
+<text x="550" y="35" text-anchor="middle" font-size="22" font-family="Arial">Hotelling T² p-values vs real-data reference windows</text>
+<line x1="90" y1="440" x2="1070" y2="440" stroke="#333"/>
+<line x1="90" y1="70" x2="90" y2="440" stroke="#333"/>
+<line x1="85" y1="440.00" x2="1070" y2="440.00" stroke="#ddd"/>
+<text x="80" y="444.00" text-anchor="end" font-size="12" font-family="Arial">0.0</text>
+<line x1="85" y1="366.00" x2="1070" y2="366.00" stroke="#ddd"/>
+<text x="80" y="370.00" text-anchor="end" font-size="12" font-family="Arial">0.2</text>
+<line x1="85" y1="292.00" x2="1070" y2="292.00" stroke="#ddd"/>
+<text x="80" y="296.00" text-anchor="end" font-size="12" font-family="Arial">0.4</text>
+<line x1="85" y1="218.00" x2="1070" y2="218.00" stroke="#ddd"/>
+<text x="80" y="222.00" text-anchor="end" font-size="12" font-family="Arial">0.6</text>
+<line x1="85" y1="144.00" x2="1070" y2="144.00" stroke="#ddd"/>
+<text x="80" y="148.00" text-anchor="end" font-size="12" font-family="Arial">0.8</text>
+<line x1="85" y1="70.00" x2="1070" y2="70.00" stroke="#ddd"/>
+<text x="80" y="74.00" text-anchor="end" font-size="12" font-family="Arial">1.0</text>
+<line x1="90" y1="421.50" x2="1070" y2="421.50" stroke="#d62728" stroke-dasharray="6 4"/>
+<text x="1066" y="415.50" text-anchor="end" font-size="12" font-family="Arial" fill="#d62728">p=0.05</text>
+<rect x="90.00" y="440.00" width="87.20" height="0.00" fill="#9467bd"/>
+<text x="133.60" y="434.00" text-anchor="middle" font-size="11" font-family="Arial">0.000</text>
+<text x="133.60" y="458.00" transform="rotate(45 133.60 458.00)" font-size="12" font-family="Arial">mask4_sabr.csv</text>
+<rect x="189.20" y="440.00" width="87.20" height="0.00" fill="#9467bd"/>
+<text x="232.80" y="434.00" text-anchor="middle" font-size="11" font-family="Arial">0.000</text>
+<text x="232.80" y="458.00" transform="rotate(45 232.80 458.00)" font-size="12" font-family="Arial">mask3_sabr.csv</text>
+<rect x="288.40" y="440.00" width="87.20" height="0.00" fill="#9467bd"/>
+<text x="332.00" y="434.00" text-anchor="middle" font-size="11" font-family="Arial">0.000</text>
+<text x="332.00" y="458.00" transform="rotate(45 332.00 458.00)" font-size="12" font-family="Arial">mask1_sabr.csv</text>
+<rect x="387.60" y="440.00" width="87.20" height="0.00" fill="#1f77b4"/>
+<text x="431.20" y="434.00" text-anchor="middle" font-size="11" font-family="Arial">0.000</text>
+<text x="431.20" y="458.00" transform="rotate(45 431.20 458.00)" font-size="12" font-family="Arial">mask5_brown.csv</text>
+<rect x="486.80" y="439.99" width="87.20" height="0.01" fill="#1f77b4"/>
+<text x="530.40" y="433.99" text-anchor="middle" font-size="11" font-family="Arial">0.000</text>
+<text x="530.40" y="458.00" transform="rotate(45 530.40 458.00)" font-size="12" font-family="Arial">mask1_brown.csv</text>
+<rect x="586.00" y="439.98" width="87.20" height="0.02" fill="#1f77b4"/>
+<text x="629.60" y="433.98" text-anchor="middle" font-size="11" font-family="Arial">0.000</text>
+<text x="629.60" y="458.00" transform="rotate(45 629.60 458.00)" font-size="12" font-family="Arial">mask3_brown.csv</text>
+<rect x="685.20" y="267.04" width="87.20" height="172.96" fill="#9467bd"/>
+<text x="728.80" y="261.04" text-anchor="middle" font-size="11" font-family="Arial">0.467</text>
+<text x="728.80" y="458.00" transform="rotate(45 728.80 458.00)" font-size="12" font-family="Arial">mask5_sabr.csv</text>
+<rect x="784.40" y="237.83" width="87.20" height="202.17" fill="#9467bd"/>
+<text x="828.00" y="231.83" text-anchor="middle" font-size="11" font-family="Arial">0.546</text>
+<text x="828.00" y="458.00" transform="rotate(45 828.00 458.00)" font-size="12" font-family="Arial">mask2_sabr.csv</text>
+<rect x="883.60" y="124.52" width="87.20" height="315.48" fill="#1f77b4"/>
+<text x="927.20" y="118.52" text-anchor="middle" font-size="11" font-family="Arial">0.853</text>
+<text x="927.20" y="458.00" transform="rotate(45 927.20 458.00)" font-size="12" font-family="Arial">mask4_brown.csv</text>
+<rect x="982.80" y="122.88" width="87.20" height="317.12" fill="#1f77b4"/>
+<text x="1026.40" y="116.88" text-anchor="middle" font-size="11" font-family="Arial">0.857</text>
+<text x="1026.40" y="458.00" transform="rotate(45 1026.40 458.00)" font-size="12" font-family="Arial">mask2_brown.csv</text>
+<text x="22" y="255.00" transform="rotate(-90 22 255.00)" text-anchor="middle" font-size="14" font-family="Arial">p-value</text>
+</svg>

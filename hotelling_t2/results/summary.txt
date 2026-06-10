@@ -1,0 +1,26 @@
+# Hotelling T2 result
+
+Reference features: mahalanobis_remake1/features/reference_window_features.csv
+Target features: mahalanobis_remake1/features/each_mask_features.csv
+Reference windows n: 107
+Feature dimension p: 20
+F distribution degrees of freedom: (20, 87)
+Phase-II scaling: F = n * (n - p) / [p * (n + 1) * (n - 1)] * T2
+
+Ranking by p-value:
+file,generator,t_squared,f_statistic,p_value,reject_0.05,reject_0.01
+mask4_sabr.csv,sabr,178.439474,7.254949,0.00000000,True,True
+mask3_sabr.csv,sabr,171.689362,6.980504,0.00000000,True,True
+mask1_sabr.csv,sabr,124.295732,5.053586,0.00000005,True,True
+mask5_brown.csv,brown,102.870857,4.182498,0.00000155,True,True
+mask1_brown.csv,brown,88.463720,3.596736,0.00001740,True,True
+mask3_brown.csv,brown,81.041183,3.294953,0.00006200,True,True
+mask5_sabr.csv,sabr,24.666804,1.002897,0.46745158,False,False
+mask2_sabr.csv,sabr,22.989501,0.934702,0.54640388,False,False
+mask4_brown.csv,brown,16.267135,0.661385,0.85264981,False,False
+mask2_brown.csv,brown,16.145658,0.656446,0.85707515,False,False
+
+Interpretation:
+- Smaller p-value means the feature vector is statistically farther from the real-data reference distribution.
+- p < 0.05 is treated as outside the 95% Hotelling T2 prediction region.
+- This uses the same ordinary sample mean and ordinary sample covariance as mahalanobis_remake1.

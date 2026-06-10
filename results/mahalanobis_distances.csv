@@ -1,0 +1,11 @@
+file,generator,n_rows,mahalanobis_distance
+mask4_sabr.csv,sabr,1260,13.358123895216332
+mask3_sabr.csv,sabr,1260,13.103028747086547
+mask1_sabr.csv,sabr,1260,11.148799589437777
+mask5_brown.csv,brown,1260,10.142527148380731
+mask1_brown.csv,brown,1260,9.405515410047947
+mask3_brown.csv,brown,1260,9.00228767598666
+mask5_sabr.csv,sabr,1260,4.966568584279181
+mask2_sabr.csv,sabr,1260,4.794736815212955
+mask4_brown.csv,brown,1260,4.033253676121019
+mask2_brown.csv,brown,1260,4.018165948991439
