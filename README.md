@@ -1,11 +1,11 @@
-# Mahalanobis Remake1
+# Mahalanobis
 
 2変量金融時系列データから stylized facts 特徴量を抽出し、Mahalanobis距離と Hotelling's T² によって、各 mask データが実データらしいか生成データらしいかを評価する実験ディレクトリです。
 
 ## 1. ディレクトリ構成
 
 ```text
-mahalanobis_remake1/
+mahalanobis/
   preprocessing/
     data/
       mixed_brown_masked.csv
@@ -23,7 +23,7 @@ mahalanobis_remake1/
   experiment_documentation.md
 ```
 
-詳しい実験内容、特徴量、数式、実装の説明は [experiment_documentation.md](/Users/satouhinata/Documents/DSS_code/mahalanobis_remake1/experiment_documentation.md) にまとめています。
+詳しい実験内容、特徴量、数式、実装の説明は [experiment_documentation.md](experiment_documentation.md) にまとめています。
 
 ## 2. 入力データ
 
@@ -36,6 +36,9 @@ preprocessing/data/mixed_sabr_masked.csv
 ```
 
 `train_data/train_sp500_us10y.csv` は実データ参照分布を作るためのデータです。
+実行時には `--train-csv` で、手元に置いた `train_sp500_us10y.csv` のパスを指定してください。
+
+`preprocessing/data/*.csv` については、clone直後に前処理から実行する場合は、手元の `mixed_brown_masked.csv` と `mixed_sabr_masked.csv` を `preprocessing/data/` に配置してください。
 
 `mixed_brown_masked.csv` と `mixed_sabr_masked.csv` は、以下のような列を持つ mixed 形式のCSVです。
 
@@ -47,10 +50,10 @@ mask1_sp500,mask1_DGS10,mask2_sp500,mask2_DGS10,...
 
 ## 3. each_mask の作成
 
-`mahalanobis_remake1` ディレクトリに移動します。
+GitHubからcloneしたリポジトリのルートディレクトリに移動します。
 
 ```bash
-cd mahalanobis_remake1
+cd mahalanobis
 ```
 
 前処理スクリプトを実行します。
@@ -220,4 +223,3 @@ mask5_sabr.csv
 ```
 
 それ以外の6件は参照windowの最大距離を超えており、実データ分布から見て外側に位置しています。
-
