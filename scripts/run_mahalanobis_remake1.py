@@ -300,6 +300,82 @@ def save_bar_svg(results: list[dict[str, object]], output_path: Path) -> None:
     output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def empirical_percentile(value: float, reference_values: list[float]) -> float:
+    if not reference_values:
+        return 0.0
+    count_le = sum(1 for ref in reference_values if ref <= value)
+    return 100.0 * count_le / len(reference_values)
+
+
+def empirical_upper_tail_probability(value: float, reference_values: list[float]) -> float:
+    if not reference_values:
+        return 0.0
+    count_ge = sum(1 for ref in reference_values if ref >= value)
+    return count_ge / len(reference_values)
+
+
+def save_distance_distribution_svg(
+    reference_distances: list[dict[str, object]],
+    mask_positions: list[dict[str, object]],
+    output_path: Path,
+) -> None:
+    ref_values = [float(row["mahalanobis_distance"]) for row in reference_distances]
+    max_value = max(ref_values + [float(row["mahalanobis_distance"]) for row in mask_positions] + [1.0])
+    width, height = 1200, 680
+    ml, mr, mt, mb = 90, 220, 70, 80
+    pw, ph = width - ml - mr, height - mt - mb
+    bin_count = 18
+    bin_width = max_value / bin_count
+    counts = [0 for _ in range(bin_count)]
+    for value in ref_values:
+        idx = min(int(value / bin_width), bin_count - 1)
+        counts[idx] += 1
+    max_count = max(counts + [1])
+    bar_gap = 3
+    bar_w = pw / bin_count - bar_gap
+
+    lines = [
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
+        '<rect width="100%" height="100%" fill="white"/>',
+        '<text x="600" y="35" text-anchor="middle" font-size="22" font-family="Arial">each_mask positions in real-window Mahalanobis distance distribution</text>',
+        f'<line x1="{ml}" y1="{mt + ph}" x2="{ml + pw}" y2="{mt + ph}" stroke="#333"/>',
+        f'<line x1="{ml}" y1="{mt}" x2="{ml}" y2="{mt + ph}" stroke="#333"/>',
+    ]
+    for tick in range(6):
+        count = max_count * tick / 5
+        y = mt + ph - (count / max_count) * ph
+        lines.append(f'<line x1="{ml - 5}" y1="{y:.2f}" x2="{ml + pw}" y2="{y:.2f}" stroke="#ddd"/>')
+        lines.append(f'<text x="{ml - 10}" y="{y + 4:.2f}" text-anchor="end" font-size="12" font-family="Arial">{count:.0f}</text>')
+
+    for idx, count in enumerate(counts):
+        x = ml + idx * (pw / bin_count)
+        bar_h = (count / max_count) * ph
+        y = mt + ph - bar_h
+        lines.append(f'<rect x="{x:.2f}" y="{y:.2f}" width="{bar_w:.2f}" height="{bar_h:.2f}" fill="#d9d9d9" stroke="#999"/>')
+
+    for tick in range(6):
+        value = max_value * tick / 5
+        x = ml + (value / max_value) * pw
+        lines.append(f'<line x1="{x:.2f}" y1="{mt + ph}" x2="{x:.2f}" y2="{mt + ph + 5}" stroke="#333"/>')
+        lines.append(f'<text x="{x:.2f}" y="{mt + ph + 22}" text-anchor="middle" font-size="12" font-family="Arial">{value:.1f}</text>')
+
+    sorted_masks = sorted(mask_positions, key=lambda row: float(row["mahalanobis_distance"]))
+    for idx, row in enumerate(sorted_masks):
+        value = float(row["mahalanobis_distance"])
+        x = ml + (value / max_value) * pw
+        color = "#9467bd" if row["generator"] == "sabr" else "#1f77b4"
+        label_y = mt + 20 + (idx % 10) * 22
+        label = svg_escape(str(row["file"]))
+        lines.append(f'<line x1="{x:.2f}" y1="{mt}" x2="{x:.2f}" y2="{mt + ph}" stroke="{color}" stroke-width="2"/>')
+        lines.append(f'<circle cx="{x:.2f}" cy="{mt + ph + 34}" r="5" fill="{color}"/>')
+        lines.append(f'<text x="{ml + pw + 18}" y="{label_y:.2f}" font-size="12" font-family="Arial" fill="{color}">{label}: D={value:.2f}, pct={float(row["reference_percentile"]):.1f}</text>')
+
+    lines.append(f'<text x="{ml + pw / 2:.2f}" y="{height - 20}" text-anchor="middle" font-size="14" font-family="Arial">Mahalanobis distance</text>')
+    lines.append(f'<text x="22" y="{mt + ph / 2:.2f}" transform="rotate(-90 22 {mt + ph / 2:.2f})" text-anchor="middle" font-size="14" font-family="Arial">Reference window count</text>')
+    lines.append("</svg>")
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+
+
 def zscore_color(value: float) -> str:
     clipped = max(min(value, 3.0), -3.0)
     if clipped >= 0:
@@ -364,10 +440,25 @@ def main() -> None:
     ref_std = [sample_std([float(row[name]) for row in reference_rows]) for name in FEATURE_NAMES]
     covariance = covariance_matrix(reference_rows, FEATURE_NAMES)
     inv_covariance = invert_matrix(covariance)
+    reference_distance_rows: list[dict[str, object]] = []
+    for row in reference_rows:
+        values = [float(row[name]) for name in FEATURE_NAMES]
+        distance = mahalanobis_distance(values, ref_mean, inv_covariance)
+        reference_distance_rows.append(
+            {
+                "window_start": row["window_start"],
+                "window_end": row["window_end"],
+                "mahalanobis_distance": distance,
+            }
+        )
+    reference_distance_values = [
+        float(row["mahalanobis_distance"]) for row in reference_distance_rows
+    ]
 
     results: list[dict[str, object]] = []
     feature_rows: list[dict[str, object]] = []
     zscore_rows: list[dict[str, object]] = []
+    position_rows: list[dict[str, object]] = []
 
     for path in sorted(Path(args.mask_dir).glob("*.csv")):
         sp500, dgs10 = read_series(path)
@@ -375,12 +466,26 @@ def main() -> None:
         values = [features[name] for name in FEATURE_NAMES]
         distance = mahalanobis_distance(values, ref_mean, inv_covariance)
         generator = infer_generator(path)
+        reference_percentile = empirical_percentile(distance, reference_distance_values)
+        upper_tail_probability = empirical_upper_tail_probability(distance, reference_distance_values)
         results.append(
             {
                 "file": path.name,
                 "generator": generator,
                 "n_rows": len(sp500),
                 "mahalanobis_distance": distance,
+                "reference_percentile": reference_percentile,
+                "empirical_upper_tail_probability": upper_tail_probability,
+            }
+        )
+        position_rows.append(
+            {
+                "file": path.name,
+                "generator": generator,
+                "n_rows": len(sp500),
+                "mahalanobis_distance": distance,
+                "reference_percentile": reference_percentile,
+                "empirical_upper_tail_probability": upper_tail_probability,
             }
         )
         feature_rows.append({"file": path.name, "generator": generator, **features})
@@ -391,19 +496,60 @@ def main() -> None:
         zscore_rows.append({"file": path.name, "generator": generator, **zscores})
 
     results = sorted(results, key=lambda row: float(row["mahalanobis_distance"]), reverse=True)
-    write_csv(results_dir / "mahalanobis_distances.csv", results, ["file", "generator", "n_rows", "mahalanobis_distance"])
+    position_rows = sorted(position_rows, key=lambda row: float(row["mahalanobis_distance"]), reverse=True)
+    write_csv(
+        results_dir / "reference_window_distances.csv",
+        reference_distance_rows,
+        ["window_start", "window_end", "mahalanobis_distance"],
+    )
+    write_csv(
+        results_dir / "mahalanobis_distances.csv",
+        results,
+        [
+            "file",
+            "generator",
+            "n_rows",
+            "mahalanobis_distance",
+            "reference_percentile",
+            "empirical_upper_tail_probability",
+        ],
+    )
+    write_csv(
+        results_dir / "mask_distance_positions.csv",
+        position_rows,
+        [
+            "file",
+            "generator",
+            "n_rows",
+            "mahalanobis_distance",
+            "reference_percentile",
+            "empirical_upper_tail_probability",
+        ],
+    )
     write_csv(features_dir / "each_mask_features.csv", feature_rows, ["file", "generator"] + FEATURE_NAMES)
     write_csv(results_dir / "feature_zscores.csv", zscore_rows, ["file", "generator"] + FEATURE_NAMES)
 
     save_bar_svg(results, figures_dir / "mahalanobis_distances.svg")
     save_heatmap_svg(zscore_rows, figures_dir / "feature_zscores_heatmap.svg")
+    save_distance_distribution_svg(
+        reference_distance_rows,
+        position_rows,
+        figures_dir / "mask_positions_in_reference_distribution.svg",
+    )
 
     selected_features = "\n".join(f"- {name}" for name in FEATURE_NAMES)
-    ranking_lines = ["file,generator,n_rows,mahalanobis_distance"]
+    ranking_lines = ["file,generator,n_rows,mahalanobis_distance,reference_percentile,empirical_upper_tail_probability"]
     for row in results:
         ranking_lines.append(
-            f'{row["file"]},{row["generator"]},{row["n_rows"]},{float(row["mahalanobis_distance"]):.6f}'
+            f'{row["file"]},{row["generator"]},{row["n_rows"]},'
+            f'{float(row["mahalanobis_distance"]):.6f},'
+            f'{float(row["reference_percentile"]):.2f},'
+            f'{float(row["empirical_upper_tail_probability"]):.6f}'
         )
+    ref_distance_mean = mean(reference_distance_values)
+    ref_distance_std = sample_std(reference_distance_values)
+    ref_distance_min = min(reference_distance_values)
+    ref_distance_max = max(reference_distance_values)
     summary = f"""# Mahalanobis remake1 result
 
 Reference data: {args.train_csv}
@@ -412,16 +558,24 @@ Reference window length: {args.window_length}
 Reference stride: {args.stride}
 Reference windows: {len(reference_rows)}
 Covariance inverse: ordinary sample covariance + Gauss-Jordan inverse
+Reference window distance summary:
+- min: {ref_distance_min:.6f}
+- mean: {ref_distance_mean:.6f}
+- std: {ref_distance_std:.6f}
+- max: {ref_distance_max:.6f}
 
 Selected features:
 {selected_features}
 
-Ranking by Mahalanobis distance:
+Ranking by Mahalanobis distance and position in reference distribution:
 {chr(10).join(ranking_lines)}
 
 Interpretation:
 - Smaller distance means the sample is closer to the real-data feature distribution estimated from train_data.
 - Larger distance means the sample is farther from the reference distribution and is treated as more generated-data-like.
+- Real reference windows also have nonzero Mahalanobis distances; therefore, the key quantity is where each mask distance lies inside the empirical reference-window distance distribution.
+- `reference_percentile` is the percentage of reference windows with distance less than or equal to the mask distance.
+- `empirical_upper_tail_probability` is the fraction of reference windows with distance greater than or equal to the mask distance.
 - This is a draft baseline using ordinary sample mean and ordinary sample covariance.
 """
     (results_dir / "summary.txt").write_text(summary, encoding="utf-8")

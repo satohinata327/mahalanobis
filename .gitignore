@@ -1,0 +1,8 @@
+.DS_Store
+logs/
+log/
+*.log
+
+# Raw or generated data
+preprocessing/data/*.csv
+each_mask/
