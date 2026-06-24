@@ -1,4 +1,6 @@
 .DS_Store
+__pycache__/
+*.py[cod]
 logs/
 log/
 *.log
@@ -6,3 +8,5 @@ log/
 # Raw or generated data
 preprocessing/data/*.csv
 each_mask/
+
+*.csv

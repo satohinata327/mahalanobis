@@ -321,8 +321,12 @@ def save_distance_distribution_svg(
 ) -> None:
     ref_values = [float(row["mahalanobis_distance"]) for row in reference_distances]
     max_value = max(ref_values + [float(row["mahalanobis_distance"]) for row in mask_positions] + [1.0])
-    width, height = 1200, 680
-    ml, mr, mt, mb = 90, 220, 70, 80
+    label_step = 22
+    label_top_padding = 20
+    label_bottom_padding = 40
+    min_height_for_labels = 70 + label_top_padding + label_step * max(len(mask_positions) - 1, 0) + label_bottom_padding + 80
+    width, height = 1260, max(680, min_height_for_labels)
+    ml, mr, mt, mb = 90, 300, 70, 80
     pw, ph = width - ml - mr, height - mt - mb
     bin_count = 18
     bin_width = max_value / bin_count
@@ -364,7 +368,7 @@ def save_distance_distribution_svg(
         value = float(row["mahalanobis_distance"])
         x = ml + (value / max_value) * pw
         color = "#9467bd" if row["generator"] == "sabr" else "#1f77b4"
-        label_y = mt + 20 + (idx % 10) * 22
+        label_y = mt + label_top_padding + idx * label_step
         label = svg_escape(str(row["file"]))
         lines.append(f'<line x1="{x:.2f}" y1="{mt}" x2="{x:.2f}" y2="{mt + ph}" stroke="{color}" stroke-width="2"/>')
         lines.append(f'<circle cx="{x:.2f}" cy="{mt + ph + 34}" r="5" fill="{color}"/>')
