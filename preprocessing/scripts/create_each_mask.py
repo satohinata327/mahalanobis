@@ -28,6 +28,8 @@ def mask_names(headers: list[str]) -> list[str]:
 
 def dataset_name(path: Path) -> str:
     name = path.stem
+    if name.startswith("mixed_data_"):
+        return name[len("mixed_data_") :]
     if name.startswith("mixed_"):
         name = name[len("mixed_") :]
     if name.endswith("_masked"):
@@ -73,7 +75,13 @@ def split_directory(input_dir: Path, output_dir: Path) -> list[Path]:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Create each_mask/*.csv files from mixed_brown_masked.csv and mixed_sabr_masked.csv."
+        description="Create each_mask/*.csv files from mixed-format CSV files."
+    )
+    parser.add_argument(
+        "--input-file",
+        default=None,
+        type=Path,
+        help="Single mixed-format CSV file to split. If omitted, --input-dir is scanned.",
     )
     parser.add_argument(
         "--input-dir",
@@ -92,7 +100,11 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
-    paths = split_directory(args.input_dir, args.output_dir)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    if args.input_file is not None:
+        paths = split_file(args.input_file, args.output_dir)
+    else:
+        paths = split_directory(args.input_dir, args.output_dir)
     print(f"Wrote {len(paths)} files to {args.output_dir}")
     for path in paths:
         print(path)
